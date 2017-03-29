@@ -5,10 +5,12 @@ import (
 	"errors"
 	"io/ioutil"
 	"net/http"
+	"time"
 )
 
-var apiURL = "https://dns.google.com/resolve"
-var ednsSubnet = "0.0.0.0/0"
+const apiURL = "https://dns.google.com/resolve"
+const ednsSubnet = "0.0.0.0/0"
+const defaultTimeout = 30 * time.Second
 
 type Response struct {
 	Status int  `json:"Status"`
@@ -42,8 +44,8 @@ type Response struct {
 	Comment          string        `json:"Comment"`
 }
 
-func dig(host, recordType string) ([]byte, error) {
-	client := &http.Client{}
+func dig(host, recordType string, timeout time.Duration) ([]byte, error) {
+	client := &http.Client{Timeout: timeout}
 
 	req, _ := http.NewRequest("GET", apiURL, nil)
 
@@ -68,7 +70,13 @@ func dig(host, recordType string) ([]byte, error) {
 // Query sends request to Google dns service and parses response.
 // e.g: httpdig.Query("google.com", "NS")
 func Query(host string, t string) (Response, error) {
-	resp, err := dig(host, t)
+	resp, err := QueryWithTimeout(host, t, defaultTimeout)
+	return resp, err
+}
+
+// QueryWithTimeout allows a timeout on the request.
+func QueryWithTimeout(host, t string, timeout time.Duration) (Response, error) {
+	resp, err := dig(host, t, timeout)
 	if err != nil {
 		return Response{}, err
 	}
