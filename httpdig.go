@@ -62,7 +62,10 @@ func dig(host, recordType string, timeout time.Duration) ([]byte, error) {
 	}
 	defer resp.Body.Close()
 
-	body, _ := ioutil.ReadAll(resp.Body)
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return []byte{}, fmt.Errorf("error reading response: %s", err.Error())
+	}
 
 	return body, nil
 }
