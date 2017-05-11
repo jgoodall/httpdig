@@ -2,7 +2,7 @@ package httpdig
 
 import (
 	"encoding/json"
-	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -58,7 +58,7 @@ func dig(host, recordType string, timeout time.Duration) ([]byte, error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return []byte{}, errors.New("Unable to resolve host")
+		return []byte{}, fmt.Errorf("http error: %s", err.Error())
 	}
 	defer resp.Body.Close()
 
